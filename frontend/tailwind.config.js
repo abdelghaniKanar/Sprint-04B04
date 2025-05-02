@@ -29,9 +29,6 @@ export default {
         "recipe-card":
           "0 4px 6px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.05)",
       },
-      backgroundImage: {
-        "food-pattern": "url('/src/assets/food-pattern.png')",
-      },
     },
   },
   plugins: [],

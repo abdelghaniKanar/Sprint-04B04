@@ -1,35 +1,91 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { RecipeProvider } from "./contexts/RecipeContext";
+import { useAuth } from "./contexts/AuthContext";
+
+// Import pages (we'll create these next)
+// Placeholder imports for now
+const Landing = () => <div>Landing Page</div>;
+const Home = () => <div className="text-center">Home Page</div>;
+const RecipeDetail = () => <div>Recipe Detail Page</div>;
+const Dashboard = () => <div>Dashboard</div>;
+const MyRecipes = () => <div>My Recipes</div>;
+const AddRecipe = () => <div>Add Recipe</div>;
+const Profile = () => <div>Profile</div>;
+
+// Protected route component
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" />;
+  }
+
+  return children;
+};
+
+// Guest route (redirect if logged in)
+const GuestRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/home" />;
+  }
+
+  return children;
+};
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <AuthProvider>
+      <RecipeProvider>
+        <Router>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <GuestRoute>
+                  <Landing />
+                </GuestRoute>
+              }
+            />
+            <Route path="/home" element={<Home />} />
+            <Route path="/recipe/:id" element={<RecipeDetail />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            >
+              <Route
+                index
+                element={<Navigate to="/dashboard/my-recipes" replace />}
+              />
+              <Route path="my-recipes" element={<MyRecipes />} />
+              <Route path="add-recipe" element={<AddRecipe />} />
+              <Route path="profile" element={<Profile />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </RecipeProvider>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
