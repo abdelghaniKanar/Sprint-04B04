@@ -73,7 +73,7 @@ const Navbar = ({ onRegisterClick, onLoginClick }) => {
         {isAuthenticated ? (
           <Link
             to="/dashboard"
-            className="font-medium text-recipe-brown hover:text-recipe-red transition-colors"
+            className="font-medium text-lime-950 hover:text-lime-950 transition-colors"
           >
             {user.username}
           </Link>
@@ -106,7 +106,7 @@ const Navbar = ({ onRegisterClick, onLoginClick }) => {
               to={isAuthenticated ? "/home" : "/"}
               className="flex items-center"
             >
-              <span className="text-2xl font-bold text-recipe-red">
+              <span className="text-2xl font-bold text-lime-950">
                 RecipeShare
               </span>
             </Link>
