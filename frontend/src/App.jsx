@@ -1,179 +1,160 @@
-// import {
-//   BrowserRouter as Router,
-//   Routes,
-//   Route,
-//   Navigate,
-// } from "react-router-dom";
-// import { AuthProvider } from "./contexts/AuthContext";
-// import { RecipeProvider } from "./contexts/RecipeContext";
-// import { useAuth } from "./contexts/AuthContext";
+import React, { useState } from "react";
+import Navbar from "./components/Navbar";
+import Banner from "./components/Banner";
+import SearchFilter from "./components/SearchFilter";
+import RecipeCards from "./components/RecipeCards";
+import Footer from "./components/Footer";
+import LoginModal from "./components/LoginModal";
+import RegisterModal from "./components/RegisterModal";
 
-// // Import pages (we'll create these next)
-// // Placeholder imports for now
-// const Landing = () => <div>Landing Page</div>;
-// const Home = () => <div className="text-center">Home Page</div>;
-// const RecipeDetail = () => <div>Recipe Detail Page</div>;
-// const Dashboard = () => <div>Dashboard</div>;
-// const MyRecipes = () => <div>My Recipes</div>;
-// const AddRecipe = () => <div>Add Recipe</div>;
-// const Profile = () => <div>Profile</div>;
+// Static recipe data
+const RECIPE_DATA = [
+  {
+    id: 1,
+    title: "Spaghetti Carbonara",
+    category: "Italian",
+    image: "https://source.unsplash.com/300x200/?pasta",
+    prepTime: "25 mins",
+    difficulty: "Medium",
+    rating: 4.8,
+  },
+  {
+    id: 2,
+    title: "Beef Stroganoff",
+    category: "Russian",
+    image: "https://source.unsplash.com/300x200/?beef",
+    prepTime: "40 mins",
+    difficulty: "Medium",
+    rating: 4.5,
+  },
+  {
+    id: 3,
+    title: "Chicken Curry",
+    category: "Indian",
+    image: "https://source.unsplash.com/300x200/?curry",
+    prepTime: "35 mins",
+    difficulty: "Medium",
+    rating: 4.7,
+  },
+  {
+    id: 4,
+    title: "Greek Salad",
+    category: "Greek",
+    image: "https://source.unsplash.com/300x200/?salad",
+    prepTime: "15 mins",
+    difficulty: "Easy",
+    rating: 4.3,
+  },
+  {
+    id: 5,
+    title: "Beef Tacos",
+    category: "Mexican",
+    image: "https://source.unsplash.com/300x200/?tacos",
+    prepTime: "30 mins",
+    difficulty: "Easy",
+    rating: 4.6,
+  },
+  {
+    id: 6,
+    title: "Vegetable Stir Fry",
+    category: "Asian",
+    image: "https://source.unsplash.com/300x200/?stirfry",
+    prepTime: "20 mins",
+    difficulty: "Easy",
+    rating: 4.4,
+  },
+];
 
-// // Protected route component
-// const ProtectedRoute = ({ children }) => {
-//   const { isAuthenticated, loading } = useAuth();
+function App() {
+  const [recipes, setRecipes] = useState(RECIPE_DATA);
+  const [filteredRecipes, setFilteredRecipes] = useState(RECIPE_DATA);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [user, setUser] = useState(null);
 
-//   if (loading) {
-//     return <div>Loading...</div>;
-//   }
+  // Search handler
+  const handleSearch = (term) => {
+    if (!term) {
+      setFilteredRecipes(recipes);
+      return;
+    }
 
-//   if (!isAuthenticated) {
-//     return <Navigate to="/" />;
-//   }
-
-//   return children;
-// };
-
-// // Guest route (redirect if logged in)
-// const GuestRoute = ({ children }) => {
-//   const { isAuthenticated, loading } = useAuth();
-
-//   if (loading) {
-//     return <div>Loading...</div>;
-//   }
-
-//   if (isAuthenticated) {
-//     return <Navigate to="/home" />;
-//   }
-
-//   return children;
-// };
-
-// function App() {
-//   return (
-//     <AuthProvider>
-//       <RecipeProvider>
-//         <Router>
-//           <Routes>
-//             <Route
-//               path="/"
-//               element={
-//                 <GuestRoute>
-//                   <Landing />
-//                 </GuestRoute>
-//               }
-//             />
-//             <Route path="/home" element={<Home />} />
-//             <Route path="/recipe/:id" element={<RecipeDetail />} />
-//             <Route
-//               path="/dashboard"
-//               element={
-//                 <ProtectedRoute>
-//                   <Dashboard />
-//                 </ProtectedRoute>
-//               }
-//             >
-//               <Route
-//                 index
-//                 element={<Navigate to="/dashboard/my-recipes" replace />}
-//               />
-//               <Route path="my-recipes" element={<MyRecipes />} />
-//               <Route path="add-recipe" element={<AddRecipe />} />
-//               <Route path="profile" element={<Profile />} />
-//             </Route>
-//             <Route path="*" element={<Navigate to="/" replace />} />
-//           </Routes>
-//         </Router>
-//       </RecipeProvider>
-//     </AuthProvider>
-//   );
-// }
-
-// export default App;
-
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import { AuthProvider } from "./contexts/AuthContext";
-import { RecipeProvider } from "./contexts/RecipeContext";
-import { useAuth } from "./contexts/AuthContext";
-import Landing from "./pages/Landing";
-import Home from "./pages/Home";
-
-// Protected route component
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-recipe-red"></div>
-      </div>
+    const filtered = recipes.filter((recipe) =>
+      recipe.title.toLowerCase().includes(term.toLowerCase())
     );
-  }
+    setFilteredRecipes(filtered);
+  };
 
-  return isAuthenticated ? children : <Navigate to="/" />;
-};
+  // Category filter handler
+  const handleCategoryFilter = (category) => {
+    if (!category || category === "All") {
+      setFilteredRecipes(recipes);
+      return;
+    }
 
-// Guest route (redirect if logged in)
-const GuestRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+    const filtered = recipes.filter((recipe) => recipe.category === category);
+    setFilteredRecipes(filtered);
+  };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-recipe-red"></div>
-      </div>
-    );
-  }
+  // Login handler
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setShowLoginModal(false);
+  };
 
-  return isAuthenticated ? <Navigate to="/home" /> : children;
-};
+  // Register handler
+  const handleRegister = (userData) => {
+    setUser(userData);
+    setShowRegisterModal(false);
+  };
 
-// The main app component with context providers
-const AppWrapper = () => {
+  // Logout handler
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem("user");
+  };
+
   return (
-    <AuthProvider>
-      <RecipeProvider>
-        <AppRoutes />
-      </RecipeProvider>
-    </AuthProvider>
-  );
-};
+    <div className="flex flex-col min-h-screen">
+      <Navbar
+        user={user}
+        onLoginClick={() => setShowLoginModal(true)}
+        onRegisterClick={() => setShowRegisterModal(true)}
+        onLogout={handleLogout}
+      />
+      <Banner />
+      <main className="flex-grow">
+        <SearchFilter
+          onSearch={handleSearch}
+          onCategoryFilter={handleCategoryFilter}
+        />
+        <RecipeCards recipes={filteredRecipes} />
+      </main>
+      <Footer />
 
-// The routes component that uses the context
-const AppRoutes = () => {
-  return (
-    <Router>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <GuestRoute>
-              <Landing />
-            </GuestRoute>
-          }
+      {showLoginModal && (
+        <LoginModal
+          onClose={() => setShowLoginModal(false)}
+          onLogin={handleLogin}
+          onRegisterClick={() => {
+            setShowLoginModal(false);
+            setShowRegisterModal(true);
+          }}
         />
-        <Route path="/home" element={<Home />} />
-        {/* Placeholder routes for now */}
-        <Route
-          path="/recipe/:id"
-          element={<div>Recipe Detail (Coming Soon)</div>}
-        />
-        <Route
-          path="/dashboard/*"
-          element={
-            <ProtectedRoute>
-              <div>Dashboard (Coming Soon)</div>
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
-  );
-};
+      )}
 
-export default AppWrapper;
+      {showRegisterModal && (
+        <RegisterModal
+          onClose={() => setShowRegisterModal(false)}
+          onRegister={handleRegister}
+          onLoginClick={() => {
+            setShowRegisterModal(false);
+            setShowLoginModal(true);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+export default App;
